@@ -1,31 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>3D Ecommerce Store</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Three.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/examples/js/loaders/GLTFLoader.js"></script>
+  <meta charset="UTF-8">
+  <title>Unique E-Commerce Store</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #fdfdfd; }
+    header { background: linear-gradient(to right, #1e3c72, #2a5298); color: #fff; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    nav { display: flex; justify-content: center; gap: 1rem; margin-top: 0.5rem; }
+    nav a { color: #fff; text-decoration: none; padding: 0.4rem 1rem; border-radius: 5px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+    nav a:hover { background: rgba(255,255,255,0.3); }
+    main { padding: 2rem; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+    .product-card { background: #fff; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); padding: 1rem; text-align: center; transition: transform 0.2s; }
+    .product-card:hover { transform: scale(1.02); }
+    .product-card img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
+    .product-card h2 { font-size: 1.2rem; margin: 0.5rem 0; color: #333; }
+    .product-card p { color: #555; margin: 0.3rem 0; }
+    .product-card button { background: #2a5298; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; margin-top: 1rem; transition: background 0.2s; }
+    .product-card button:hover { background: #1e3c72; }
+    .product-details { background: #fff; padding: 2rem; border-radius: 8px; max-width: 700px; margin: 2rem auto; box-shadow: 0 3px 12px rgba(0,0,0,0.1); text-align: center; }
+    .product-details img { max-width: 100%; height: auto; border-radius: 8px; }
+    .product-details h2, .product-details p { margin: 1rem 0; }
+    .about, .admin, #login-page { max-width: 700px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 0.7rem; margin-bottom: 1rem; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 0.7rem 1.2rem; border: none; border-radius: 5px; background: #2a5298; color: #fff; cursor: pointer; }
+    button:hover { background: #1e3c72; }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>3D Ecommerce Store</h1>
-        <nav>
-            <a href="#" onclick="showPage('home')">Home</a>
-            <a href="#" onclick="showPage('cart')">Cart (<span id="cart-count">0</span>)</a>
-            <a href="#" onclick="showPage('about')">About Us</a>
-            <a href="#" onclick="showPage('login')" id="login-link">Login</a>
-            <span id="user-greeting" style="display:none;"></span>
-        </nav>
-    </header>
-    <main>
-        <section id="home-page"></section>
-        <section id="product-details-page" style="display:none;"></section>
-        <section id="cart-page" style="display:none;"></section>
-        <section id="login-page" style="display:none;"></section>
-        <section id="about-page" style="display:none;"></section>
-    </main>
-    <script src="app.js"></script>
+  <header>
+    <h1>✨ Unique Gifting Store ✨</h1>
+    <nav>
+      <a href="#" onclick="showCategory('All')">All</a>
+      <a href="#" onclick="showCategory('Keychains')">Keychains</a>
+      <a href="#" onclick="showCategory('Mugs')">Mugs</a>
+      <a href="#" onclick="showCategory('Photo Frames')">Photo Frames</a>
+      <a href="#" onclick="showCategory('Gift Items')">Gift Items</a>
+      <a href="#" onclick="showCategory('Cups')">Cups</a>
+      <a href="#" onclick="showPage('admin')">Admin</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home-page"></section>
+    <section id="product-details-page" style="display:none;"></section>
+    <section id="admin-page" style="display:none;">
+      <div class="admin">
+        <h2>Admin Panel</h2>
+        <input id="admin-name" placeholder="Product Name">
+        <input id="admin-price" placeholder="Price in INR" type="number">
+        <input id="admin-category" placeholder="Category (e.g., Keychains, Mugs, etc)">
+        <input id="admin-image" placeholder="Image URL">
+        <textarea id="admin-description" placeholder="Description"></textarea>
+        <button onclick="addProduct()">Add Product</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const products = [
+      { id: 1, name: "Love Keychain", price: 99, category: "Keychains", image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80", description: "Heart-shaped keychain perfect for gifts." },
+      { id: 2, name: "Custom Mug", price: 249, category: "Mugs", image: "https://images.unsplash.com/photo-1508057198894-247b23fe5ade?auto=format&fit=crop&w=400&q=80", description: "Add your own photo or name!" },
+      { id: 3, name: "Wooden Photo Frame", price: 499, category: "Photo Frames", image: "https://images.unsplash.com/photo-1601655782461-5f62b7fc8a6f?auto=format&fit=crop&w=400&q=80", description: "Decorative wooden photo frame for memories." },
+      { id: 4, name: "Gift Hamper Box", price: 999, category: "Gift Items", image: "https://images.unsplash.com/photo-1607082349250-576c2d5dbfe3?auto=format&fit=crop&w=400&q=80", description: "All-in-one surprise gift box!" },
+      { id: 5, name: "Ceramic Tea Cup", price: 199, category: "Cups", image: "https://images.unsplash.com/photo-1525715843408-dba7d0e4c58e?auto=format&fit=crop&w=400&q=80", description: "Premium ceramic tea cup set." },
+      { id: 6, name: "Couple Keychain Set", price: 149, category: "Keychains", image: "https://images.unsplash.com/photo-1614335169047-98b5e5cfec19?auto=format&fit=crop&w=400&q=80", description: "Romantic gift for couples." },
+      { id: 7, name: "Magic Mug", price: 399, category: "Mugs", image: "https://images.unsplash.com/photo-1612154242639-4fe39f10c568?auto=format&fit=crop&w=400&q=80", description: "Reveals photo with hot water!" },
+      { id: 8, name: "Engraved Wooden Frame", price: 599, category: "Photo Frames", image: "https://images.unsplash.com/photo-1556135063-94a3582b6ec9?auto=format&fit=crop&w=400&q=80", description: "Engraved with your custom text." },
+      { id: 9, name: "Gift Basket Surprise", price: 899, category: "Gift Items", image: "https://images.unsplash.com/photo-1587202372775-74e05f3c17c7?auto=format&fit=crop&w=400&q=80", description: "Includes sweets, card, and more!" },
+      { id: 10, name: "Glass Cup Set", price: 349, category: "Cups", image: "https://images.unsplash.com/photo-1524593119773-e09d4efba59c?auto=format&fit=crop&w=400&q=80", description: "Elegant glass set for guests." }
+    ];
+
+    function showPage(page) {
+      document.querySelectorAll("main > section").forEach(s => s.style.display = 'none');
+      document.getElementById(`${page}-page`).style.display = 'block';
+    }
+
+    function showCategory(category) {
+      showPage('home');
+      const list = category === 'All' ? products : products.filter(p => p.category === category);
+      let html = '<div class="product-grid">';
+      list.forEach(p => {
+        html += `<div class="product-card">
+                  <img src="${p.image}" alt="${p.name}">
+                  <h2>${p.name}</h2>
+                  <p>₹${p.price}</p>
+                  <p><small>${p.category}</small></p>
+                  <button onclick="showDetails(${p.id})">View</button>
+                </div>`;
+      });
+      html += '</div>';
+      document.getElementById("home-page").innerHTML = html;
+    }
+
+    function showDetails(id) {
+      const p = products.find(pr => pr.id === id);
+      if (!p) return;
+      document.getElementById("product-details-page").innerHTML = `<div class='product-details'>
+        <img src='${p.image}' alt='${p.name}' />
+        <h2>${p.name}</h2>
+        <p><strong>₹${p.price}</strong></p>
+        <p>${p.description}</p>
+        <p><em>Category: ${p.category}</em></p>
+        <button>Add to Cart</button><br><br>
+        <a href='#' onclick='showCategory("All")'>← Back</a>
+      </div>`;
+      showPage("product-details");
+    }
+
+    function addProduct() {
+      const name = document.getElementById("admin-name").value.trim();
+      const price = parseFloat(document.getElementById("admin-price").value);
+      const category = document.getElementById("admin-category").value.trim();
+      const image = document.getElementById("admin-image").value.trim();
+      const description = document.getElementById("admin-description").value.trim();
+      if (!name || !price || !category || !image || !description) return alert("Fill all fields");
+      const newId = products.length + 1;
+      products.push({ id: newId, name, price, category, image, description });
+      alert("Product added!");
+      showCategory("All");
+    }
+
+    window.onload = () => showCategory("All");
+  </script>
 </body>
 </html>
